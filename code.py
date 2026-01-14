@@ -181,7 +181,7 @@ def place_logo(symbol):
         # Load BTC logo bitmap (if it exists)
         try:
             logo_bitmap = displayio.OnDiskBitmap("/btc_logo.bmp")
-            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=2)
+            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=1)
             group.append(logo_sprite)
         except Exception as e:
             print(f"Logo not found: {e}")    
