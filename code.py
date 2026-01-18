@@ -54,6 +54,9 @@ print(f"Connected! IP: {esp.pretty_ip(esp.ip_address)}")
 # Setup networking
 #requests_session = requests.Session(wifi._wifi.socket)
 
+#reset display
+displayio.release_displays()
+
 # Setup display
 matrix = Matrix()
 font = terminalio.FONT
@@ -71,16 +74,18 @@ try:
 except Exception as e:
     print(f"Logo not found: {e}")
 
-# Create text labels
-symbol_label = label.Label(font, text="TICKER", color=COLOR_WHITE, x=1, y=5)
-price_label = label.Label(font, text="$0.00", color=COLOR_WHITE, x=1, y=18)
-change_label = label.Label(font, text="+0.00%", color=COLOR_GREEN, x=1, y=28)
+# Load Symbol bitmaps
+alab_bitmap = displayio.OnDiskBitmap("/alab_logo.bmp")
+brk_bitmap = displayio.OnDiskBitmap("/brk_logo.bmp")
+btc_bitmap = displayio.OnDiskBitmap("/btc_logo.bmp")
+gld_bitmap = displayio.OnDiskBitmap("/gld_logo.bmp")
+vgd_bitmap = displayio.OnDiskBitmap("/vgd_logo.bmp")
 
-group.append(symbol_label)
-group.append(price_label)
-group.append(change_label)
+# Load clear bitmaps
+logo_bitmap = displayio.OnDiskBitmap("/clear.bmp")
 
-display.root_group = group    
+
+
 
 def get_stock_data(symbol):
     """Fetch real-time stock data from Finnhub API"""
@@ -92,6 +97,8 @@ def get_stock_data(symbol):
     try:
         print(f"\nFetching data for {symbol}...")
         response = wifi.get(quote_url)
+        #response = requests_session.get(quote_url)
+        time.sleep(1)
         data = response.json()
         response.close()
         
@@ -113,113 +120,103 @@ def get_stock_data(symbol):
     except Exception as e:
         print(f"Error: {e}")
         return None, None
-
-def clear_pixel_by_pixel_animated():
-    """Clear with visible animation effect"""
-    width = display.width
-    height = display.height
-    
-    # Start with all pixels white
-    bitmap = displayio.Bitmap(width, height, 2)
-    palette = displayio.Palette(2)
-    palette[0] = 0x000000  # Black
-    palette[1] = 0xFFFFFF  # White
-    
-    # Fill with white
-    for y in range(height):
-        for x in range(width):
-            bitmap[x, y] = 1
-    
-    tile_grid = displayio.TileGrid(bitmap, pixel_shader=palette)
-    group = displayio.Group()
-    group.append(tile_grid)
-    display.root_group = group
-    display.refresh()
-    
-    time.sleep(0.5)
-    
-    # Now erase each pixel with animation
-    for y in range(height):
-        for x in range(width):
-            bitmap[x, y] = 0
-            if (x * y) % 10 == 0:  # Refresh every few pixels for speed
-                display.refresh()
-
     
 def clear_side():
+    #try:
+    #    logo_bitmap = displayio.OnDiskBitmap("/white.bmp")
+    #    logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=1)
+    #    group.append(logo_sprite)
+    #except Exception as e:
+    #    print(f"White Logo not found: {e}")
     try:
-        logo_bitmap = displayio.OnDiskBitmap("/white.bmp")
+        #logo_bitmap = displayio.OnDiskBitmap("/clear.bmp")
         logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=1)
         group.append(logo_sprite)
     except Exception as e:
-        print(f"Logo not found: {e}")
-    try:
-        logo_bitmap = displayio.OnDiskBitmap("/clear.bmp")
-        logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=1)
-        group.append(logo_sprite)
-    except Exception as e:
-        print(f"Logo not found: {e}")
+        print(f"Clear Logo not found: {e}")
+    time.sleep(0.5)
             
 def place_logo(symbol):
     if ticker == "ALAB":
         # Load ALAB logo bitmap (if it exists)
         try:
-            logo_bitmap = displayio.OnDiskBitmap("/alab_logo.bmp")
-            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=1)
+            #logo_bitmap = displayio.OnDiskBitmap("/alab_logo.bmp")
+            logo_sprite = displayio.TileGrid(alab_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=1)
             group.append(logo_sprite)
         except Exception as e:
-            print(f"Logo not found: {e}")
+            print(f"{ticker} Logo not found: {e}")
     elif ticker == "BRK.B":
         # Load BRK logo bitmap (if it exists)
         try:
-            logo_bitmap = displayio.OnDiskBitmap("/brk_logo.bmp")
-            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=5)
+            #logo_bitmap = displayio.OnDiskBitmap("/brk_logo.bmp")
+            logo_sprite = displayio.TileGrid(brk_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=5)
             group.append(logo_sprite)
         except Exception as e:
-            print(f"Logo not found: {e}")
+            print(f"{ticker} Logo not found: {e}")
     elif ticker == "BTC":
         # Load BTC logo bitmap (if it exists)
         try:
-            logo_bitmap = displayio.OnDiskBitmap("/btc_logo.bmp")
-            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=1)
+            #logo_bitmap = displayio.OnDiskBitmap("/btc_logo.bmp")
+            logo_sprite = displayio.TileGrid(btc_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=44, y=1)
             group.append(logo_sprite)
         except Exception as e:
-            print(f"Logo not found: {e}")    
+            print(f"{ticker} Logo not found: {e}")    
     elif ticker == "GLD":
         # Load GLD logo bitmap (if it exists)
         try:
-            logo_bitmap = displayio.OnDiskBitmap("/gld_logo.bmp")
-            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=4)
+            #logo_bitmap = displayio.OnDiskBitmap("/gld_logo.bmp")
+            logo_sprite = displayio.TileGrid(gld_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=4)
             group.append(logo_sprite)
         except Exception as e:
-            print(f"Logo not found: {e}")    
+            print(f"{ticker} Logo not found: {e}")    
     elif ticker == "VOO":
         # Load VOO logo bitmap (if it exists)
         try:
-            logo_bitmap = displayio.OnDiskBitmap("/vgd_logo.bmp")
-            logo_sprite = displayio.TileGrid(logo_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=1)
+            #logo_bitmap = displayio.OnDiskBitmap("/vgd_logo.bmp")
+            logo_sprite = displayio.TileGrid(vgd_bitmap, pixel_shader=logo_bitmap.pixel_shader, x=43, y=1)
             group.append(logo_sprite)
         except Exception as e:
-            print(f"Logo not found: {e}")    
+            print(f"{ticker} Logo not found: {e}")    
 
     else:
         print("No ticker symbol logo found") 
+
+def free_display_group():
+    """Free up the display group by removing all elements"""
+    while len(group) > 0:
+        group.pop()
+    print("Display group freed (cleared all items)")
+    
+def init_display_group():
+    # Create text labels
+    global symbol_label
+    global price_label
+    global change_label
+    
+    symbol_label = label.Label(font, text="", color=COLOR_WHITE, x=1, y=5)
+    price_label = label.Label(font, text="", color=COLOR_WHITE, x=1, y=18)
+    change_label = label.Label(font, text="", color=COLOR_GREEN, x=1, y=28)
+    group.append(symbol_label)
+    group.append(price_label)
+    group.append(change_label)
+    display.root_group = group    
+    print("Display group initialized")
+
         
 # Main loop
 last_update = 0
-UPDATE_INTERVAL = 30  # Update every 60 seconds
+UPDATE_INTERVAL = 30  # Update every 30 seconds
+
 
 while True:
     
     for ticker in tickers:
-
+        free_display_group()
+        init_display_group()
         print(f"Processing: {ticker}")
-
         price, change_percent = get_stock_data(ticker)
         
         if price is not None:
-            print("Placing Logo")
-            place_logo(ticker)
             # Update Ticker
             symbol_label.text = ticker
             # Update price label
@@ -235,11 +232,15 @@ while True:
                 change_label.text = f"{change_percent:.2f}%"
                 change_label.color = COLOR_RED
                 arrow_sprite = displayio.TileGrid(reddown_bitmap, pixel_shader=reddown_bitmap.pixel_shader, x=45, y=20)
-            
+            clear_side()
+
+            print("Placing Logo")
+            place_logo(ticker)
             group.append(arrow_sprite)
             print(f"{ticker}: ${price:.2f} ({change_percent:+.2f}%)")
         else:
             print(f"No price found: {price}, {change_percent}")
+         
         time.sleep(UPDATE_INTERVAL)
-        clear_side()          
+                 
     
